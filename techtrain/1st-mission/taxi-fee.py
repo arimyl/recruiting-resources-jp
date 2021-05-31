@@ -29,9 +29,9 @@ def calculate_fee(base_fee,sum_d,time_p,time,dist,low_sp_t):
     # check time
     # 深夜割増(`00:00:00.000` 〜 `04:59:59.999`、`22:00:00.000` 〜 `23:59.59.999`)
     w=1.0 # 割増係数
-    while check_t > datetime.timedelta(hours=24):
-        check_t-=datetime.timedelta(hours=24)
-    if (datetime.timedelta(hours=0)<=check_t and check_t<=datetime.timedelta(hours=4,minutes=59,seconds=59,milliseconds=999)) | (datetime.timedelta(hours=22)<=check_t and check_t<=datetime.timedelta(hours=23,minutes=59,seconds=59,milliseconds=999)):
+    while check_t > str_to_time("24:00:00.000"):
+        check_t-=str_to_time("24:00:00.000")
+    if (str_to_time("00:00:00.000")<=check_t and check_t<=str_to_time("04:59:59.999")) | (str_to_time("22:00:00.000")<=check_t and check_t<=str_to_time("23:59:59.999")):
         w=1.25
     # sum distance
     sum_d += float(dist)*w
@@ -54,10 +54,6 @@ if __name__ == "__main__":
         if len(log_str)==0:
             # 終了コード`0`
             sys.exit()
-            # drive_logs=[]
-            # base_fee=int(410)
-            # sum_d=float(0)
-            # low_sp_t=0
         # confirm data
         if time_c.search(log_str[0])==None:
             # 終了コード`1` 以上終了
@@ -66,7 +62,6 @@ if __name__ == "__main__":
             # 終了コード`1` 以上終了
             sys.exit(1)
         drive_logs.append(log_str)
-        # print(drive_logs)
         ## calculate
         if len(drive_logs) > 1:
             (fee,base_fee,sum_d,low_sp_t)=calculate_fee(base_fee,sum_d,drive_logs[-2][0],drive_logs[-1][0],drive_logs[-2][1],low_sp_t)
