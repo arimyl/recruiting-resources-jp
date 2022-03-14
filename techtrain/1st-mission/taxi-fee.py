@@ -6,11 +6,11 @@ import sys
 ## config
 # 正規表現
 time_c = re.compile(r'\d{1,2}:\d{1,2}:\d{1,2}\.\d{1,3}')
-dist_c = re.compile(r'\d+\.\d{1}')
+dist_c = re.compile(r'\d{1,2}+\.\d{1}')
 
 ## module
 # str to time
-def str_to_time(str):
+def str_to_time(str : str) -> <datetime.timedelta>:
     """時間文字列をdatetimeに変換
     parameters
     -----
@@ -20,10 +20,10 @@ def str_to_time(str):
     -----
     datetime.timedelta
     """
-    ts = list(map(int, re.split('[:.]',str)))
+    ts = list(map(int, re.split('[:.]', str)))
     return datetime.timedelta(hours = ts[0], minutes = ts[1], seconds = ts[2], milliseconds = ts[3])
 
-def calculate_fee(drive_record, time_p,time, dist):
+def calculate_fee(drive_record : list, time_p : str,time : str, dist : str) -> None:
     """運賃計算
     結果を drive_record に記録
 
@@ -38,10 +38,10 @@ def calculate_fee(drive_record, time_p,time, dist):
     check_t = str_to_time(time) # 今回記録時間
     check_t2 = str_to_time(time_p) # 前回記録時間
     # speed fee
-    if ((float(dist)/1000)/((check_t-check_t2).total_seconds()/360)) <= 10:
-        drive_record[3] += (check_t-check_t2).total_seconds()
+    if ((float(dist) / 1000) / ((check_t-check_t2).total_seconds() / 360)) <= 10:
+        drive_record[3] += (check_t - check_t2).total_seconds()
     else:
-        drive_record[1] += int(drive_record[3]//90.0)*80
+        drive_record[1] += int(drive_record[3] // 90.0) * 80
         drive_record[3] = 0
     # check time
     # 深夜割増(`00:00:00.000` 〜 `04:59:59.999`、`22:00:00.000` 〜 `23:59.59.999`)
@@ -51,46 +51,47 @@ def calculate_fee(drive_record, time_p,time, dist):
     if (str_to_time("00:00:00.000") <= check_t and check_t <= str_to_time("04:59:59.999")) | (str_to_time("22:00:00.000") <= check_t and check_t <= str_to_time("23:59:59.999")):
         w = 1.25
     # sum distance
-    drive_record[2] += float(dist)*w
+    drive_record[2] += float(dist) * w
 
 if __name__ == "__main__":
     drive_logs = []
+    time_p = ""
     # [fee, base_fee, sum_distance, low_speed_time]
     drive_record = [int(410), int(410), float(0), 0]
 
     try:
         # input
-        while 1:
+        while True:
             drive_log = list(sys.stdin.readline().split())
             if len(drive_log) == 0:
                 break
             elif len(drive_log) == 2: 
                 drive_logs.append(drive_log)
             else:
-                sys.exit(1) 
+                sys.exit(1) # 異常終了
 
         for drive_log in drive_logs:
             # confirm data
-            if time_c.search(drive_log[0]) == None:
-                # 終了コード`1` 以上終了
+            if time_c.search(drive_log[0]) is None:
+                # 終了コード`1` 異常終了
                 sys.exit(1)
-            if dist_c.search(drive_log[1]) == None:
-                # 終了コード`1` 以上終了
+            if dist_c.search(drive_log[1]) is None:
+                # 終了コード`1` 異常終了
                 sys.exit(1)
             ## calculate
             if drive_log[1] != '0.0':
-                calculate_fee(drive_record, pre_log[0],drive_log[0],drive_log[1])
+                calculate_fee(drive_record, pre_log[0], drive_log[0], drive_log[1])
 
-            pre_log = drive_log
+            time_p = drive_log[0]
 
         ## summary
         # distance fee
         if drive_record[2] <= 1052.0:
             drive_record[0] = drive_record[1]
         else:
-            drive_record[0] = int(drive_record[1] + (drive_record[2] - 1052.0)//237*80)
+            drive_record[0] = int(drive_record[1] + (drive_record[2] - 1052.0) // 237 * 80)
         # output
         print(drive_record[0])
     
     except Exception:
-        sys.exit(1)
+        sys.exit(1) # 異常終了
