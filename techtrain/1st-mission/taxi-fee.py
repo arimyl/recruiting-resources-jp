@@ -91,8 +91,8 @@ if __name__ == "__main__":
         if drive_record[2] > 0:
             drive_record[0] += int(drive_record[2] // 90.0) * 80
         # distance fee
-        if drive_record[2] <= 1052.0:
-            fee = drive_record[1]
+        if drive_record[1] <= 1052.0:
+            fee = drive_record[0]
         else:
             fee = int(drive_record[0] + (drive_record[1] - 1052.0) // 237 * 80)
         # output
