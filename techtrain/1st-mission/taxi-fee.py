@@ -38,10 +38,10 @@ def calculate_fee(drive_record : list, time_p : str,time : str, dist : str) -> N
     check_t2 = str_to_time(time_p) # 前回記録時間
     # speed fee
     if ((float(dist) / 1000) / ((check_t-check_t2).total_seconds() / 360)) <= 10:
-        drive_record[3] += (check_t - check_t2).total_seconds()
+        drive_record[2] += (check_t - check_t2).total_seconds()
     else:
-        drive_record[1] += int(drive_record[3] // 90.0) * 80
-        drive_record[3] = 0
+        drive_record[0] += int(drive_record[2] // 90.0) * 80
+        drive_record[2] = 0
     # check time
     # 深夜割増(`00:00:00.000` 〜 `04:59:59.999`、`22:00:00.000` 〜 `23:59.59.999`)
     w = 1.0 # 割増係数
@@ -50,13 +50,14 @@ def calculate_fee(drive_record : list, time_p : str,time : str, dist : str) -> N
     if (str_to_time("00:00:00.000") <= check_t and check_t <= str_to_time("04:59:59.999")) | (str_to_time("22:00:00.000") <= check_t and check_t <= str_to_time("23:59:59.999")):
         w = 1.25
     # sum distance
-    drive_record[2] += float(dist) * w
+    drive_record[1] += float(dist) * w
 
 if __name__ == "__main__":
     drive_logs = []
     time_p = ""
-    # [fee, base_fee, sum_distance, low_speed_time]
-    drive_record = [int(410), int(410), float(0), 0]
+    # [base_fee, sum_distance, low_speed_time]
+    drive_record = [int(410), float(0), 0]
+    fee = 0
 
     try:
         # input
@@ -86,13 +87,16 @@ if __name__ == "__main__":
             time_p = drive_log[0]
 
         ## summary
+        # speed fee
+        if drive_record[2] > 0:
+            drive_record[0] += int(drive_record[2] // 90.0) * 80
         # distance fee
         if drive_record[2] <= 1052.0:
-            drive_record[0] = drive_record[1]
+            fee = drive_record[1]
         else:
-            drive_record[0] = int(drive_record[1] + (drive_record[2] - 1052.0) // 237 * 80)
+            fee = int(drive_record[0] + (drive_record[1] - 1052.0) // 237 * 80)
         # output
-        print(drive_record[0])
+        print(fee)
     
     except Exception:
         sys.exit(1) # 異常終了
