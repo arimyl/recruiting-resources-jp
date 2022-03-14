@@ -1,4 +1,3 @@
-#-*- coding: utf-8 -*-
 import datetime
 import re
 import sys
@@ -6,11 +5,11 @@ import sys
 ## config
 # 正規表現
 time_c = re.compile(r'\d{1,2}:\d{1,2}:\d{1,2}\.\d{1,3}')
-dist_c = re.compile(r'\d{1,2}+\.\d{1}')
+dist_c = re.compile(r'\d{1,2}\.\d{1}')
 
 ## module
 # str to time
-def str_to_time(str : str) -> <datetime.timedelta>:
+def str_to_time(str : str) -> datetime.timedelta:
     """時間文字列をdatetimeに変換
     parameters
     -----
@@ -61,8 +60,10 @@ if __name__ == "__main__":
 
     try:
         # input
-        while True:
-            drive_log = list(sys.stdin.readline().split())
+        # while True:
+        lines = sys.stdin.readlines()
+        for line in lines:
+            drive_log = line.split()
             if len(drive_log) == 0:
                 break
             elif len(drive_log) == 2: 
@@ -80,7 +81,7 @@ if __name__ == "__main__":
                 sys.exit(1)
             ## calculate
             if drive_log[1] != '0.0':
-                calculate_fee(drive_record, pre_log[0], drive_log[0], drive_log[1])
+                calculate_fee(drive_record, time_p, drive_log[0], drive_log[1])
 
             time_p = drive_log[0]
 
